@@ -1,7 +1,9 @@
 const HomePage = () => {
   
   return (
-    <div>HomePage</div>
+    <>
+      Mainpage
+    </>
   )
 }
 export default HomePage
