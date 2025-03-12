@@ -58,15 +58,16 @@ export const config: NextAuthConfig = {
   ],
   callbacks: {
     async session({ session, trigger, token, user }: any) {
-      // Set the User ID from the token
+      // Set the User ID from the token (JWT token)
+      console.log('session: ', session);
       session.user.id = token.sub;
 
-      // if there's an update, set the user name
+      // when user updates his user name, set the user name to the session too
       if (trigger === 'update') {
         session.user.name = user.name;
       }
 
-      return session
+      return session;
     },
   }
 };
