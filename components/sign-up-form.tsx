@@ -1,26 +1,40 @@
-'use client';
+"use client";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { signInDefaultValues } from "@/lib/constants";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useActionState } from "react";
-import { SignInResponse, signInWithCredentials } from "@/lib/actions/user.actions";
+import { SignUpResponse, signUpUser } from "@/lib/actions/user.actions";
 import { useSearchParams } from "next/navigation";
 
-const SignInForm = () => {
-  const [actionResponse, action, isPending] = useActionState<SignInResponse, FormData>(signInWithCredentials,{
+const SignUpForm = () => {
+  const [actionResponse, action, isPending] = useActionState<
+    SignUpResponse,
+    FormData
+  >(signUpUser, {
     success: false,
-    message: ''
+    message: "",
   });
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   return (
     <form action={action}>
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
       <div className="space-y-6">
+        <div>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            required
+            autoComplete="name"
+            defaultValue={signInDefaultValues.name}
+          />
+        </div>
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -44,8 +58,19 @@ const SignInForm = () => {
           />
         </div>
         <div>
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            autoComplete="confirmPassword"
+            defaultValue={signInDefaultValues.confirmPassword}
+          />
+        </div>
+        <div>
           <Button disabled={isPending} className="w-full" variant="default">
-            {isPending ? "Signing in..." : "Sign In"}
+            {isPending ? "Pending..." : "Sign Up"}
           </Button>
         </div>
 
@@ -57,12 +82,14 @@ const SignInForm = () => {
         )}
 
         <div className="text-sm text-center text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link href='/sign-up' target="_self" className="link underline">Sign Up</Link>
+          Already have an account?{" "}
+          <Link href="/sign-in" target="_self" className="link underline">
+            Sign In
+          </Link>
         </div>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default SignInForm
+export default SignUpForm;
