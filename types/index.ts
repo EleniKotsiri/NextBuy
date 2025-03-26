@@ -1,6 +1,6 @@
 // Grab from Zod Schemas
 import { z } from "zod";
-import { insertProductSchema } from "@/lib/validators";
+import { insertProductSchema, cartItemSchema, insertCartSchema } from "@/lib/validators";
 
 // Product fields' types are infered from the zod schema, and we also apply extra fields
 export type Product = z.infer<typeof insertProductSchema> & {
@@ -8,3 +8,7 @@ export type Product = z.infer<typeof insertProductSchema> & {
   rating: string;
   createdAt: Date;
 };
+
+// Cart Types
+export type CartItem = z.infer<typeof cartItemSchema>;
+export type Cart = z.infer<typeof insertCartSchema>;
