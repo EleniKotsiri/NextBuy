@@ -9,3 +9,11 @@ export const signInDefaultValues = {
   password: '',
   confirmPassword: ''
 };
+
+export const shippingAddressDefaultValues = {
+  fullname: 'John Doe',
+  streetAddress: '12 Test Str',
+  postalCode: '12312',
+  city: 'Athens',
+  country: 'Greece',
+};
