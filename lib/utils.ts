@@ -60,3 +60,18 @@ export function roundTwoDecimalPlaces(value: number | string): number {
   // return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
   // or: Number(value).toFixed(2)
 }
+
+// Currency format
+const CURRENCY_FORMATTER = new Intl.NumberFormat('el-GR', { 
+  style: "currency", 
+  currency: "EUR",
+  minimumFractionDigits: 2
+});
+
+export function formatCurrency(value: number | string | null): (number | string) {
+  if (typeof value === 'number' || typeof value === 'string') {
+    return CURRENCY_FORMATTER.format(Number(value));
+  } else {
+    return 'NaN';
+  }
+}

@@ -1,5 +1,4 @@
 "use client";
-
 import { Cart } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,8 +12,22 @@ import {
 } from "./ui/table";
 import RemoveProductButton from "./shared/product/remove-product-button";
 import AddProductButton from "./shared/product/add-product-button";
+import { formatCurrency } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Loader } from "lucide-react";
 
 const CartTable = ({ cart }: { cart?: Cart }) => {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   return (
     <>
@@ -61,13 +74,44 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                     </TableCell>
                     <TableCell className="text-right">
                       {/* <span>€ {item.price as any * item.qty}</span> */}
-                      <span>€ {item.price}</span>
+                      <span>€ {Number(item.price)}</span>
+                      {/* <span><ProductPrice value={Number(item.price)} className="text-md" /></span> */}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
+          <Card className="flex flex-col">
+            <CardHeader className="p-4 pb-2">
+              <CardTitle>Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex w-full">
+                <span>
+                  Subtotal ({cart.cartItems.reduce((a, c) => a + c.qty, 0)}):{" "}
+                  {formatCurrency(cart.cartItemsPrice)}
+                </span>
+              </div>
+            </CardContent>
+            <CardFooter className="p-2 mt-auto">
+              <Button
+                size="lg"
+                className="w-full md:text-sm"
+                disabled={isPending}
+                onClick={() =>
+                  startTransition(() => router.push("/shipping-address"))
+                }
+              >
+                {isPending ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}{" "}
+                Proceed To Checkout
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       )}
     </>

@@ -2,6 +2,7 @@
 import { signInFormSchema, signUpFormSchema } from "../validators";
 import { signIn, signOut } from "@/auth";
 import { prisma } from "@/db/prisma";
+import { User } from "@prisma/client";
 import { hashSync } from "bcrypt-ts-edge";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { formatError } from "../utils";
@@ -26,7 +27,7 @@ export async function signInWithCredentials(
     }
     return { success: false, message: "Invalid credentials provided." };
   }
-};
+}
 
 // Sign out action
 export async function signOutUser(): Promise<void> {
@@ -35,7 +36,7 @@ export async function signOutUser(): Promise<void> {
     redirect: true,
   };
   await signOut(options);
-};
+}
 
 // Sign up action
 export async function signUpUser(
@@ -59,16 +60,16 @@ export async function signUpUser(
       data: {
         name: user.name,
         email: user.email,
-        password: user.password
-      }
+        password: user.password,
+      },
     });
 
-    await signIn('credentials', {
+    await signIn("credentials", {
       email: user.email,
-      password: plainPassword
+      password: plainPassword,
     });
 
-    return { success: true, message: "User registered successfully!" }
+    return { success: true, message: "User registered successfully!" };
   } catch (error) {
     console.log(error);
     // console.log(error.name);
@@ -79,7 +80,27 @@ export async function signUpUser(
     }
     return { success: false, message: formatError(error) };
   }
-};
+}
+
+// Define the SafeUser type, to omit the password field when grabbing a user from prisma
+export type SafeUser = Omit<User, "password">;
+
+// Get User by ID
+export async function getUserById(userId: string): Promise<SafeUser> {
+  try {
+    const user = await prisma.user.findFirst({
+      where: { id: userId },
+    });
+    if (!user) throw new Error("User not found");
+
+    // Remove sensitive info
+    const { password, ...safeUser } = user;
+    return safeUser;
+  } catch (error) {
+    console.error(`Failed to fetch user:`, error);
+    throw new Error("An error occurred while retrieving the user.");
+  }
+}
 
 // Define the SignInResponse type
 export interface SignInResponse {
