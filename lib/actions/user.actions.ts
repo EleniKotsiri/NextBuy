@@ -1,11 +1,12 @@
 "use server";
-import { signInFormSchema, signUpFormSchema } from "../validators";
-import { signIn, signOut } from "@/auth";
+import { shippingAddressSchema, signInFormSchema, signUpFormSchema } from "../validators";
+import { auth, signIn, signOut } from "@/auth";
 import { prisma } from "@/db/prisma";
 import { User } from "@prisma/client";
 import { hashSync } from "bcrypt-ts-edge";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { formatError } from "../utils";
+import { ShippingAddress } from "@/types";
 
 // Sign in action
 export async function signInWithCredentials(
@@ -99,6 +100,38 @@ export async function getUserById(userId: string): Promise<SafeUser> {
   } catch (error) {
     console.error(`Failed to fetch user:`, error);
     throw new Error("An error occurred while retrieving the user.");
+  }
+}
+
+// Update user address
+export async function updateUserAddress(data: ShippingAddress) {
+  try {
+    // Get user from session
+    const session = await auth();
+    // Find user in the db
+    const currentUser = await prisma.user.findFirst({
+      where: { id: session?.user?.id },
+    });
+    if (!currentUser) throw new Error("User not found.");
+
+    // parse data
+    const address = shippingAddressSchema.parse(data);
+    // update user address info in db
+    await prisma.user.update({
+      where: { id: currentUser.id },
+      data: { address }
+    });
+
+    return {
+      success: true,
+      message: 'User updated successfuly'
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
   }
 }
 

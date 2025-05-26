@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTransition } from "react";
 import { shippingAddressSchema } from "@/lib/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ControllerRenderProps, useForm } from "react-hook-form";
+import { ControllerRenderProps, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { shippingAddressDefaultValues } from "@/lib/constants";
 import {
@@ -19,6 +19,7 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { ArrowRight, Loader } from "lucide-react";
+import { updateUserAddress } from "@/lib/actions/user.actions";
 
 const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
   const router = useRouter();
@@ -32,11 +33,23 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof shippingAddressSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-  }
+  const onSubmit: SubmitHandler<z.infer<typeof shippingAddressSchema>> = async (
+    values: z.infer<typeof shippingAddressSchema>
+  ) => {
+    startTransition(async () => {
+      const res = await updateUserAddress(values);
+
+      if (!res.success) {
+        toast({
+          variant: "destructive",
+          description: res.message || "Failed to update user information",
+        });
+        return;
+      }
+
+      router.push("/checkout");
+    });
+  };
 
   return (
     <>
@@ -167,7 +180,8 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
                   <Loader className="w-4 h-4 animate-spin" />
                 ) : (
                   <ArrowRight className="w-4 h-4" />
-                )} Continue
+                )}{" "}
+                Continue
               </Button>
             </div>
           </form>
