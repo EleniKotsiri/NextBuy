@@ -30,7 +30,7 @@ const ShippingAddressPage = async () => {
     );
   } catch (error) {
     console.log("Error bringing the user's cart: ", error);
-    // redirect("/");
+    redirect('/sign-in');
   }
 };
 

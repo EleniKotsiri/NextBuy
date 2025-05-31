@@ -52,8 +52,8 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       return;
     });
   };
-
-  const existItem = (cart?.cartItems as CartItem[]).find(
+  
+  const existItem = (cart?.cartItems as CartItem[])?.find(
     (cartItm) => cartItm.productId === item.productId
   );
 

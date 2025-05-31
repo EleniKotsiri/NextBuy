@@ -14,6 +14,7 @@ const ProductImages = ({ images }: { images: string[] }) => {
         alt="product image"
         width={1000}
         height={1000}
+        priority={true}
         className="min-h-[300px] object-cover object-center"
       />
       <div className="flex">

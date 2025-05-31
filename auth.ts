@@ -81,11 +81,37 @@ export const config: NextAuthConfig = {
     async jwt({ token, user, trigger, session }: any) {
       // Assign user fields (role and name) to token
       if (user) {
+        token.id = user.id;
         token.role = user.role;
-
         // If user has no name, use the email
         if (user.name === "NO_NAME") {
           token.name = user.email!.split("@")[0];
+        }
+
+        // Persist cart session when signing in/up
+        if (trigger === 'signIn' || trigger === 'signUp') {
+          const cookiesObj = await cookies();
+          const sessionCartId = cookiesObj.get("sessionCartId")?.value;
+
+          // set session cart cookie to sessionCartId field in cart model
+          if (sessionCartId) {
+            const sessionCart = await prisma.cart.findFirst({
+              where: { sessionCartId }
+            });
+
+            if (sessionCart) {
+              // delete current user cart
+              await prisma.cart.deleteMany({
+                where: { userId: user.id }
+              });
+
+              // assign new cart
+              await prisma.cart.update({
+                where: { id: sessionCart.id },
+                data: { userId: user.id }
+              });
+            }
+          }
         }
 
         // Update database to reflect token name

@@ -40,7 +40,7 @@ const calcPrice = (
 
 export async function addItemToCart(
   data: CartItem
-): Promise<AddItemToCartResponse> {
+): Promise<CartMessageResponse> {
   try {
     // Check for Cart cookie
     const sessionCartId = (await cookies()).get("sessionCartId")?.value;
@@ -85,14 +85,14 @@ export async function addItemToCart(
 
     } else {
       // Check if item is already in cart
-      const existItem = (cart.cartItems as CartItem[]).find((cartItm) => cartItm.productId === item.productId);
+      const existItem = (cart?.cartItems as CartItem[]).find((cartItm) => cartItm.productId === item.productId);
       if (existItem) {
         // Check stock
         if (product.stock < existItem.qty + 1) {
           throw new Error('Not enough stock');
         }
         // Increase the quantity
-        (cart.cartItems as CartItem[]).find((cartItm) => cartItm.productId === item.productId)!.qty = ++existItem.qty;
+        (cart?.cartItems as CartItem[]).find((cartItm) => cartItm.productId === item.productId)!.qty = ++existItem.qty;
       } else {
         // When item does not exist in cart
         // Check stock
@@ -129,7 +129,8 @@ export async function addItemToCart(
 
 export async function getMyCart(): Promise<GetMyCartResponse | undefined> {
   // Check for Cart cookie
-  const sessionCartId = (await cookies()).get("sessionCartId")?.value;
+  const cookiesObj = await cookies();
+  const sessionCartId = cookiesObj.get("sessionCartId")?.value;
   if (!sessionCartId) throw new Error("Cart session not found");
 
   // Get session and user id
@@ -154,7 +155,7 @@ export async function getMyCart(): Promise<GetMyCartResponse | undefined> {
   });
 }
 
-export async function removeItemFromCart(productId: string): Promise<RemoveItemFromCartResponse> {
+export async function removeItemFromCart(productId: string): Promise<CartMessageResponse> {
   try {
     // Check for Cart cookie
     const sessionCartId = (await cookies()).get("sessionCartId")?.value;
@@ -171,7 +172,7 @@ export async function removeItemFromCart(productId: string): Promise<RemoveItemF
     if (!cart) throw new Error('Cart not found.');
 
     // Check if that item exists in cart
-    const existItem = (cart.cartItems as CartItem[]).find((cartItm) => cartItm.productId === productId);
+    const existItem = (cart?.cartItems as CartItem[]).find((cartItm) => cartItm.productId === productId);
     if(!existItem) throw new Error('Item not found');
 
     // Check item's qty
@@ -206,14 +207,14 @@ export async function removeItemFromCart(productId: string): Promise<RemoveItemF
   }
 }
 
-// Define the AddItemToCartResponse type
-export interface AddItemToCartResponse {
+// Define the CartMessageResponse type
+export type CartMessageResponse = {
   success: boolean;
   message: string | any;
 }
 
 // Define the GetMyCartResponse type
-export interface GetMyCartResponse {
+export type GetMyCartResponse = {
   id: string;
   userId: string | null;
   sessionCartId: string | null;
@@ -223,10 +224,4 @@ export interface GetMyCartResponse {
   totalPrice: string;
   shippingPrice: string;
   taxPrice: string;
-}
-
-// Define the RemoveItemFromCartResponse type
-export interface RemoveItemFromCartResponse {
-  success: boolean;
-  message: string | any;
 }
